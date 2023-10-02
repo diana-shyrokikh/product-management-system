@@ -1,3 +1,5 @@
+import datetime
+
 from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,7 +11,11 @@ async def get_all_products(
 ) -> list[models.Product]:
     query = select(models.Product)
     product_list = await db.execute(query)
-    return [product[0] for product in product_list.fetchall()]
+    return [
+        product[0]
+        for product
+        in product_list.fetchall()
+    ]
 
 
 async def get_product(
@@ -18,6 +24,22 @@ async def get_product(
 ) -> [models.Product | None]:
     query = select(models.Product).where(
         models.Product.id == product_id
+    )
+    product = await db.execute(query)
+    product = product.fetchone()
+
+    if product:
+        return product[0]
+
+    return None
+
+
+async def get_product_by_name(
+        db: AsyncSession,
+        product_name: str
+) -> [models.Product | None]:
+    query = select(models.Product).where(
+        models.Product.name == product_name
     )
     product = await db.execute(query)
     product = product.fetchone()
@@ -44,7 +66,8 @@ async def create_product(
 
     new_product = {
         **product.model_dump(),
-        "id": new_product.lastrowid
+        "id": new_product.lastrowid,
+        "created_at": datetime.datetime.now()
     }
 
     return new_product
@@ -79,7 +102,7 @@ async def delete_product(
         db: AsyncSession,
         product_id: int,
 ) -> [dict | bool]:
-    query = select(models.Prouct).where(
+    query = select(models.Product).where(
         models.Product.id == product_id
     )
     deleted_product = await db.execute(query)
