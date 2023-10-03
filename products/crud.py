@@ -79,7 +79,7 @@ async def create_product(
 async def update_product(
         db: AsyncSession,
         product_id: int,
-        new_data: dict,
+        new_data: schemas.UpdateProduct,
 ) -> [models.Product | None]:
     query = select(models.Product).where(
         models.Product.id == product_id

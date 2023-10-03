@@ -79,7 +79,7 @@ async def update_product(
     commons: Annotated[
         dict, Depends(common_product_parameters)
     ],
-    new_data:  dict,
+    new_data: schemas.UpdateProduct,
 ) -> [schemas.Product | Exception]:
     updated_product = await crud.update_product(
         db=commons.get("db"),
