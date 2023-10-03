@@ -54,6 +54,9 @@ async def create_product(
         db: AsyncSession,
         product: schemas.CreateProduct
 ) -> dict:
+    product.name = product.name.strip().capitalize()
+    product.description = product.description.strip().capitalize()
+
     query = insert(models.Product).values(
         name=product.name,
         description=product.description,
@@ -88,7 +91,10 @@ async def update_product(
         updated_product = updated_product[0]
 
         for field, value in new_data.items():
-            setattr(updated_product, field, value)
+            if field in ("name", "description"):
+                setattr(updated_product, field, value.strip().capitalize())
+            else:
+                setattr(updated_product, field, value)
 
         await db.commit()
         await db.refresh(updated_product)
