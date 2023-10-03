@@ -90,11 +90,12 @@ async def update_product(
     if updated_product:
         updated_product = updated_product[0]
 
-        for field, value in new_data.items():
-            if field in ("name", "description"):
-                setattr(updated_product, field, value.strip().capitalize())
-            else:
-                setattr(updated_product, field, value)
+        if new_data.name:
+            updated_product.name = new_data.name.strip().capitalize()
+        if new_data.description:
+            updated_product.description = new_data.description.strip().capitalize()
+        if new_data.price:
+            updated_product.price = new_data.price
 
         await db.commit()
         await db.refresh(updated_product)
