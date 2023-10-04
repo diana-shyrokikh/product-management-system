@@ -5,8 +5,11 @@ from sqlalchemy import (
     Numeric,
     DateTime,
     func,
+    ForeignKey,
 )
+from sqlalchemy.orm import relationship
 
+import product_categories.models
 from database import Base
 
 
@@ -27,4 +30,13 @@ class Product(Base):
     )
     created_at = Column(
         DateTime, server_default=func.now()
+    )
+    category_id = Column(
+        Integer, ForeignKey(
+            "product_categories.id", ondelete="CASCADE"
+        )
+    )
+
+    category = relationship(
+        product_categories.models.ProductCategory
     )

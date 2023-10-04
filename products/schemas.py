@@ -8,6 +8,7 @@ class ProductBase(BaseModel):
     name: str
     description: str
     price: float
+    category_id: int
 
     class Config:
         json_encoders = {
@@ -21,6 +22,7 @@ class CreateProduct(BaseModel):
     name: str
     description: str
     price: float
+    category_id: int
 
     @field_validator("name")
     def validate_name(cls, name):
@@ -50,13 +52,22 @@ class CreateProduct(BaseModel):
     def validate_price(cls, price):
         if float(price) < 1:
             raise ValueError("Price must be greater than 0")
+
         return price
+
+    @field_validator("category_id")
+    def validate_category_id(cls, category_id):
+        if float(category_id) < 1:
+            raise ValueError("Category id must be greater than 0")
+
+        return category_id
 
 
 class UpdateProduct(BaseModel):
     name: str = None
     description: str = None
     price: float = None
+    category_id: int = None
 
     @field_validator("name")
     def validate_name(cls, name):
@@ -91,6 +102,14 @@ class UpdateProduct(BaseModel):
                 raise ValueError("Price must be greater than 0")
 
             return price
+
+    @field_validator("category_id")
+    def validate_category_id(cls, category_id):
+        if category_id:
+            if float(category_id) < 1:
+                raise ValueError("Category id must be greater than 0")
+
+            return category_id
 
 
 class Product(ProductBase):
