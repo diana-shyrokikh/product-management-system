@@ -55,7 +55,7 @@ async def create_product(
         product: schemas.CreateProduct
 ) -> dict:
     product.name = product.name.strip().capitalize()
-    product.description = product.description.strip().capitalize()
+    product.description = product.description.strip()
 
     query = insert(models.Product).values(
         name=product.name,
@@ -94,7 +94,7 @@ async def update_product(
         if new_data.name:
             updated_product.name = new_data.name.strip().capitalize()
         if new_data.description:
-            updated_product.description = new_data.description.strip().capitalize()
+            updated_product.description = new_data.description.strip()
         if new_data.price:
             updated_product.price = new_data.price
         if new_data.category_id:
