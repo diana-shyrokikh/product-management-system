@@ -14,6 +14,7 @@ from dependencies import (
 )
 
 from products import crud, schemas
+import product_categories.crud
 
 
 router = APIRouter()
@@ -68,6 +69,14 @@ async def create_product(
             detail="Such product already exists"
         )
 
+    if not await product_categories.crud.get_category(
+        db=db, category_id=product.category_id
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Such category doesn't exist"
+        )
+
     return await crud.create_product(db=db, product=product)
 
 
@@ -81,6 +90,16 @@ async def update_product(
     ],
     new_data: schemas.UpdateProduct,
 ) -> [schemas.Product | Exception]:
+    if new_data.category_id:
+        if not await product_categories.crud.get_category(
+                db=commons.get("db"),
+                category_id=new_data.category_id
+        ):
+            raise HTTPException(
+                status_code=400,
+                detail="Such category doesn't exist"
+            )
+
     updated_product = await crud.update_product(
         db=commons.get("db"),
         product_id=commons.get("product_id"),
