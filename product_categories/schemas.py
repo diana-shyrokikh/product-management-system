@@ -28,7 +28,7 @@ class UpdateCategory(BaseModel):
 
     @field_validator("name")
     def validate_name(cls, name):
-        if name is not None:
+        if name:
             pattern = r"^[A-Za-z][A-Za-z0-9\s]*$"
 
             if not re.match(pattern, name):

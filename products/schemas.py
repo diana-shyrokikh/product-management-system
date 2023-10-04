@@ -60,7 +60,7 @@ class UpdateProduct(BaseModel):
 
     @field_validator("name")
     def validate_name(cls, name):
-        if name is not None:
+        if name:
             pattern = r"^[A-Za-z][A-Za-z0-9\s]*$"
 
             if not re.match(pattern, name):
@@ -73,7 +73,7 @@ class UpdateProduct(BaseModel):
 
     @field_validator("description")
     def validate_description(cls, description):
-        if description is not None:
+        if description:
             pattern = r"^[A-Za-z][A-Za-z0-9\s]*$"
 
             if not re.match(pattern, description):
@@ -86,9 +86,10 @@ class UpdateProduct(BaseModel):
 
     @field_validator("price")
     def validate_price(cls, price):
-        if price is not None:
+        if price:
             if float(price) < 1:
                 raise ValueError("Price must be greater than 0")
+
             return price
 
 
