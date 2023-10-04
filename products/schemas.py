@@ -1,7 +1,14 @@
 import datetime
-import re
 
-from pydantic import BaseModel, field_validator
+from pydantic import (
+    BaseModel,
+    field_validator
+)
+
+from validators import (
+    validate_string,
+    validate_number
+)
 
 
 class ProductBase(BaseModel):
@@ -26,90 +33,40 @@ class CreateProduct(BaseModel):
 
     @field_validator("name")
     def validate_name(cls, name):
-        pattern = r"^[A-Za-z][A-Za-z0-9\s]*$"
-
-        if not re.match(pattern, name):
-            raise ValueError(
-                "Name must only contain letters, "
-                "numbers, or spaces"
-            )
-
-        return name
+        return validate_string(
+            name,
+            r"^[A-Za-z][A-Za-z0-9\s]*$",
+            "Name must only contain letters, "
+            "numbers, or spaces and start with letter"
+        )
 
     @field_validator("description")
     def validate_description(cls, description):
-        pattern = r"^[A-Za-z][A-Za-z0-9\s]*$"
-
-        if not re.match(pattern, description):
-            raise ValueError(
-                "Description must only contain letters, "
-                "numbers, or spaces"
-            )
-
-        return description
+        return validate_string(
+            description,
+            r"^[A-Za-z][A-Za-z0-9\s]*$",
+            "Description must only contain letters, "
+            "numbers, or spaces and start with letter"
+        )
 
     @field_validator("price")
     def validate_price(cls, price):
-        if float(price) < 1:
-            raise ValueError("Price must be greater than 0")
-
-        return price
+        return validate_number(
+            price, "Price"
+        )
 
     @field_validator("category_id")
     def validate_category_id(cls, category_id):
-        if float(category_id) < 1:
-            raise ValueError("Category id must be greater than 0")
+        return validate_number(
+            category_id, "Category id"
+        )
 
-        return category_id
 
-
-class UpdateProduct(BaseModel):
+class UpdateProduct(CreateProduct):
     name: str = None
     description: str = None
     price: float = None
     category_id: int = None
-
-    @field_validator("name")
-    def validate_name(cls, name):
-        if name:
-            pattern = r"^[A-Za-z][A-Za-z0-9\s]*$"
-
-            if not re.match(pattern, name):
-                raise ValueError(
-                    "Name must only contain letters, "
-                    "numbers, or spaces"
-                )
-
-            return name
-
-    @field_validator("description")
-    def validate_description(cls, description):
-        if description:
-            pattern = r"^[A-Za-z][A-Za-z0-9\s]*$"
-
-            if not re.match(pattern, description):
-                raise ValueError(
-                    "Description must only contain letters, "
-                    "numbers, or spaces"
-                )
-
-            return description
-
-    @field_validator("price")
-    def validate_price(cls, price):
-        if price:
-            if float(price) < 1:
-                raise ValueError("Price must be greater than 0")
-
-            return price
-
-    @field_validator("category_id")
-    def validate_category_id(cls, category_id):
-        if category_id:
-            if float(category_id) < 1:
-                raise ValueError("Category id must be greater than 0")
-
-            return category_id
 
 
 class Product(ProductBase):
