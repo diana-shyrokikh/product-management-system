@@ -5,8 +5,9 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from products.models import *
-from product_categories import *
+from products.models import Product
+from product_categories.models import ProductCategory
+from users.models import User
 
 from database import Base
 
