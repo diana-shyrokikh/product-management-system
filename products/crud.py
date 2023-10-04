@@ -61,6 +61,7 @@ async def create_product(
         name=product.name,
         description=product.description,
         price=product.price,
+        category_id=product.category_id
     )
 
     new_product = await db.execute(query)
@@ -96,6 +97,8 @@ async def update_product(
             updated_product.description = new_data.description.strip().capitalize()
         if new_data.price:
             updated_product.price = new_data.price
+        if new_data.category_id:
+            updated_product.category_id = new_data.category_id
 
         await db.commit()
         await db.refresh(updated_product)
