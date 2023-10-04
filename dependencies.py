@@ -14,3 +14,10 @@ async def common_product_parameters(
         db: AsyncSession = Depends(get_db),
 ) -> dict:
     return {"db": db, "product_id": product_id}
+
+
+async def common_category_parameters(
+        category_id: int,
+        db: AsyncSession = Depends(get_db),
+) -> dict:
+    return {"db": db, "category_id": category_id}
