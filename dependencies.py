@@ -21,3 +21,10 @@ async def common_category_parameters(
         db: AsyncSession = Depends(get_db),
 ) -> dict:
     return {"db": db, "category_id": category_id}
+
+
+async def common_user_parameters(
+        user_id: int,
+        db: AsyncSession = Depends(get_db),
+) -> dict:
+    return {"db": db, "user_id": user_id}
