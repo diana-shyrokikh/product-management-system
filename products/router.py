@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from dependencies import (
     get_db,
-    common_product_parameters,
+    common_object_parameters,
 )
 
 from products import crud, schemas
@@ -36,12 +36,12 @@ async def read_products(
 )
 async def retrieve_product(
     commons: Annotated[
-        dict, Depends(common_product_parameters)
+        dict, Depends(common_object_parameters)
     ],
 ) -> [schemas.Product | Exception]:
     product = await crud.get_product(
         db=commons.get("db"),
-        product_id=commons.get("product_id")
+        product_id=commons.get("object_id")
     )
 
     if product:
@@ -86,7 +86,7 @@ async def create_product(
 )
 async def update_product(
     commons: Annotated[
-        dict, Depends(common_product_parameters)
+        dict, Depends(common_object_parameters)
     ],
     new_data: schemas.UpdateProduct,
 ) -> [schemas.Product | Exception]:
@@ -102,7 +102,7 @@ async def update_product(
 
     updated_product = await crud.update_product(
         db=commons.get("db"),
-        product_id=commons.get("product_id"),
+        product_id=commons.get("object_id"),
         new_data=new_data,
     )
 
@@ -121,12 +121,12 @@ async def update_product(
 )
 async def delete_product(
     commons: Annotated[
-        dict, Depends(common_product_parameters)
+        dict, Depends(common_object_parameters)
     ],
 ) -> [schemas.DeleteProduct | Exception]:
     deleted_product = await crud.delete_product(
         db=commons.get("db"),
-        product_id=commons.get("product_id"),
+        product_id=commons.get("object_id"),
     )
 
     if deleted_product:

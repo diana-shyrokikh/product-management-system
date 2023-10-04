@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from dependencies import (
     get_db,
-    common_user_parameters,
+    common_object_parameters,
 )
 
 from users import crud, schemas
@@ -35,12 +35,12 @@ async def read_users(
 )
 async def retrieve_user(
     commons: Annotated[
-        dict, Depends(common_user_parameters)
+        dict, Depends(common_object_parameters)
     ],
 ) -> [schemas.User | Exception]:
     user = await crud.get_user(
         db=commons.get("db"),
-        user_id=commons.get("user_id")
+        user_id=commons.get("object_id")
     )
 
     if user:
@@ -77,13 +77,13 @@ async def create_user(
 )
 async def update_user(
     commons: Annotated[
-        dict, Depends(common_user_parameters)
+        dict, Depends(common_object_parameters)
     ],
     new_data: schemas.UpdateUser,
 ) -> [schemas.User | Exception]:
     updated_user = await crud.update_user(
         db=commons.get("db"),
-        user_id=commons.get("user_id"),
+        user_id=commons.get("object_id"),
         new_data=new_data,
     )
 
@@ -102,12 +102,12 @@ async def update_user(
 )
 async def delete_user(
     commons: Annotated[
-        dict, Depends(common_user_parameters)
+        dict, Depends(common_object_parameters)
     ],
 ) -> [schemas.DeleteUser | Exception]:
     deleted_user = await crud.delete_user(
         db=commons.get("db"),
-        user_id=commons.get("user_id"),
+        user_id=commons.get("object_id"),
     )
 
     if deleted_user:

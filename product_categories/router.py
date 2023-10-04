@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from dependencies import (
     get_db,
-    common_category_parameters,
+    common_object_parameters,
 )
 
 from product_categories import crud, schemas
@@ -34,12 +34,12 @@ async def read_categories(
 )
 async def retrieve_category(
     commons: Annotated[
-        dict, Depends(common_category_parameters)
+        dict, Depends(common_object_parameters)
     ],
 ) -> [schemas.Category | Exception]:
     category = await crud.get_category(
         db=commons.get("db"),
-        category_id=commons.get("category_id")
+        category_id=commons.get("object_id")
     )
 
     if category:
@@ -76,13 +76,13 @@ async def create_category(
 )
 async def update_category(
     commons: Annotated[
-        dict, Depends(common_category_parameters)
+        dict, Depends(common_object_parameters)
     ],
     new_data: schemas.UpdateCategory,
 ) -> [schemas.Category | Exception]:
     updated_category = await crud.update_category(
         db=commons.get("db"),
-        category_id=commons.get("category_id"),
+        category_id=commons.get("object_id"),
         new_data=new_data,
     )
 
@@ -101,12 +101,12 @@ async def update_category(
 )
 async def delete_category(
     commons: Annotated[
-        dict, Depends(common_category_parameters)
+        dict, Depends(common_object_parameters)
     ],
 ) -> [schemas.DeleteCategory | Exception]:
     deleted_category = await crud.delete_category(
         db=commons.get("db"),
-        category_id=commons.get("category_id"),
+        category_id=commons.get("object_id"),
     )
 
     if deleted_category:

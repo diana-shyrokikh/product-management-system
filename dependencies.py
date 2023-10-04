@@ -9,22 +9,8 @@ async def get_db() -> AsyncSession:
         yield session
 
 
-async def common_product_parameters(
-        product_id: int,
+async def common_object_parameters(
+        pk: int,
         db: AsyncSession = Depends(get_db),
 ) -> dict:
-    return {"db": db, "product_id": product_id}
-
-
-async def common_category_parameters(
-        category_id: int,
-        db: AsyncSession = Depends(get_db),
-) -> dict:
-    return {"db": db, "category_id": category_id}
-
-
-async def common_user_parameters(
-        user_id: int,
-        db: AsyncSession = Depends(get_db),
-) -> dict:
-    return {"db": db, "user_id": user_id}
+    return {"db": db, "object_id": pk}
