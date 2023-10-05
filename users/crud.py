@@ -1,8 +1,12 @@
-from passlib.context import CryptContext
 from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from users import models, schemas
+from users.utils import (
+    get_hashed_password,
+    verify_password,
+    create_token,
+)
 
 
 async def get_all_users(
@@ -53,17 +57,16 @@ async def create_user(
         db: AsyncSession,
         user: schemas.CreateUser
 ) -> dict:
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
     user.username = user.username.strip()
     user.email = user.email.strip()
-    user.password = pwd_context.hash(user.password.strip())
 
     query = insert(models.User).values(
         username=user.username,
         email=user.email,
         phone_number=user.phone_number,
-        password=user.password,
+        password=get_hashed_password(
+            user.password.strip()
+        )
     )
 
     new_user = await db.execute(query)
@@ -99,10 +102,9 @@ async def update_user(
         if new_data.phone_number:
             updated_user.phone_number = new_data.phone_number
         if new_data.password:
-            pwd_context = CryptContext(
-                schemes=["bcrypt"], deprecated="auto"
+            updated_user.password = get_hashed_password(
+                new_data.password.strip()
             )
-            updated_user.password = pwd_context.hash(new_data.password)
 
         await db.commit()
         await db.refresh(updated_user)
@@ -129,3 +131,30 @@ async def delete_user(
         return {"message": "User deleted"}
 
     return False
+
+
+async def login_user(
+        db: AsyncSession,
+        user_username: str,
+        password: str
+) -> [dict | bool]:
+    query = select(models.User).where(
+        models.User.username == user_username
+    )
+    user = await db.execute(query)
+    user = user.fetchone()
+
+    if not user:
+        return False
+
+    if not verify_password(password, user[0].password):
+        return False
+
+    return {
+        "access_token": create_token(
+            user[0].username, "access"
+        ),
+        "refresh_token": create_token(
+            user[0].username, "refresh"
+        )
+    }
