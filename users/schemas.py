@@ -69,3 +69,8 @@ class User(UserBase):
 
 class DeleteUser(BaseModel):
     message: str
+
+
+class Token(BaseModel):
+    access_token: str
+    refresh_token: str
