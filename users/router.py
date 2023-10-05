@@ -14,9 +14,11 @@ from dependencies import (
     get_db,
     common_object_parameters,
     get_current_user,
+    is_admin,
 )
 
 from users import crud, schemas, utils
+from users.utils import verify_token
 
 router = APIRouter()
 
@@ -27,6 +29,7 @@ router = APIRouter()
 )
 async def read_users(
     db: AsyncSession = Depends(get_db),
+    admin: schemas.User = Depends(is_admin)
 ) -> [list[schemas.User] | list]:
     return await crud.get_all_users(db=db)
 
@@ -39,6 +42,7 @@ async def retrieve_user(
     commons: Annotated[
         dict, Depends(common_object_parameters)
     ],
+    admin: schemas.User = Depends(is_admin)
 ) -> [schemas.User | Exception]:
     user = await crud.get_user(
         db=commons.get("db"),
@@ -66,7 +70,7 @@ async def create_user(
             db=db, user_username=user.username
     ):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=400,
             detail="Such user already exist"
         )
 
@@ -74,27 +78,18 @@ async def create_user(
 
 
 @router.put(
-    "/users/{user_id}/",
+    "/me/",
     response_model=schemas.User,
 )
 async def update_user(
-    commons: Annotated[
-        dict, Depends(common_object_parameters)
-    ],
     new_data: schemas.UpdateUser,
+    db: AsyncSession = Depends(get_db),
+    user: schemas.User = Depends(get_current_user),
 ) -> [schemas.User | Exception]:
-    updated_user = await crud.update_user(
-        db=commons.get("db"),
-        user_id=commons.get("object_id"),
-        new_data=new_data,
-    )
-
-    if updated_user:
-        return updated_user
-
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="You cannot update user data which not found"
+    return await crud.update_user(
+        db=db,
+        user=user,
+        new_data=new_data
     )
 
 
@@ -106,6 +101,7 @@ async def delete_user(
     commons: Annotated[
         dict, Depends(common_object_parameters)
     ],
+    admin: schemas.User = Depends(is_admin)
 ) -> [schemas.DeleteUser | Exception]:
     deleted_user = await crud.delete_user(
         db=commons.get("db"),
@@ -121,7 +117,7 @@ async def delete_user(
     )
 
 
-@router.post("/login", response_model=schemas.Token)
+@router.post("/login/", response_model=schemas.Token)
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: AsyncSession = Depends(get_db),
@@ -139,13 +135,13 @@ async def login(
     return tokens
 
 
-@router.post("/refresh_token", response_model=schemas.Token)
+@router.post("/refresh_token/", response_model=schemas.Token)
 async def refresh_token(
     token: str,
 ) -> [schemas.Token | Exception]:
-    user = await get_current_user(token=token, token_type="refresh")
+    payload = verify_token(token=token, token_type="refresh")
     new_access_token = utils.create_token(
-        user,
+        payload.get("sub"),
         "refresh",
     )
 
@@ -155,8 +151,8 @@ async def refresh_token(
     }
 
 
-@router.get("/me",  response_model=schemas.User)
-async def get_me(
+@router.get("/me/",  response_model=schemas.User)
+async def get_my_profile(
         user: schemas.User = Depends(get_current_user)
 ) -> [schemas.User | Exception]:
     return user

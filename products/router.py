@@ -4,13 +4,16 @@ from fastapi import (
     APIRouter,
     Depends,
     HTTPException,
+    status
 )
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from users import schemas as user_schemas
 from dependencies import (
     get_db,
     common_object_parameters,
+    is_admin,
 )
 
 from products import crud, schemas
@@ -48,7 +51,7 @@ async def retrieve_product(
         return product
 
     raise HTTPException(
-        status_code=404,
+        status_code=status.HTTP_404_NOT_FOUND,
         detail="Product not found"
     )
 
@@ -60,12 +63,13 @@ async def retrieve_product(
 async def create_product(
     product: schemas.CreateProduct,
     db: AsyncSession = Depends(get_db),
+    admin: user_schemas.User = Depends(is_admin)
 ) -> [schemas.Product | Exception]:
     if await crud.get_product_by_name(
             db=db, product_name=product.name
     ):
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Such product already exists"
         )
 
@@ -73,7 +77,7 @@ async def create_product(
         db=db, category_id=product.category_id
     ):
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Such category doesn't exist"
         )
 
@@ -89,6 +93,7 @@ async def update_product(
         dict, Depends(common_object_parameters)
     ],
     new_data: schemas.UpdateProduct,
+    admin: user_schemas.User = Depends(is_admin)
 ) -> [schemas.Product | Exception]:
     if new_data.category_id:
         if not await product_categories.crud.get_category(
@@ -96,7 +101,7 @@ async def update_product(
                 category_id=new_data.category_id
         ):
             raise HTTPException(
-                status_code=400,
+                status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Such category doesn't exist"
             )
 
@@ -110,7 +115,7 @@ async def update_product(
         return updated_product
 
     raise HTTPException(
-        status_code=404,
+        status_code=status.HTTP_404_NOT_FOUND,
         detail="You cannot update product data which not found"
     )
 
@@ -123,6 +128,7 @@ async def delete_product(
     commons: Annotated[
         dict, Depends(common_object_parameters)
     ],
+    admin: user_schemas.User = Depends(is_admin)
 ) -> [schemas.DeleteProduct | Exception]:
     deleted_product = await crud.delete_product(
         db=commons.get("db"),
@@ -133,6 +139,6 @@ async def delete_product(
         return deleted_product
 
     raise HTTPException(
-        status_code=404,
+        status_code=status.HTTP_404_NOT_FOUND,
         detail="You cannot delete the product which not found"
     )
