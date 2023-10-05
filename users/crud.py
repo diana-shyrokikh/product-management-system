@@ -83,35 +83,32 @@ async def create_user(
 
 async def update_user(
         db: AsyncSession,
-        user_id: int,
+        user: schemas.User,
         new_data: schemas.UpdateUser,
 ) -> [models.User | None]:
     query = select(models.User).where(
-        models.User.id == user_id
+        models.User.id == user.id
     )
     updated_user = await db.execute(query)
     updated_user = updated_user.fetchone()
 
-    if updated_user:
-        updated_user = updated_user[0]
+    updated_user = updated_user[0]
 
-        if new_data.username:
-            updated_user.username = new_data.username.strip()
-        if new_data.email:
-            updated_user.email = new_data.email.strip()
-        if new_data.phone_number:
-            updated_user.phone_number = new_data.phone_number
-        if new_data.password:
-            updated_user.password = get_hashed_password(
-                new_data.password.strip()
-            )
+    if new_data.username:
+        updated_user.username = new_data.username.strip()
+    if new_data.email:
+        updated_user.email = new_data.email.strip()
+    if new_data.phone_number:
+        updated_user.phone_number = new_data.phone_number
+    if new_data.password:
+        updated_user.password = get_hashed_password(
+            new_data.password.strip()
+        )
 
-        await db.commit()
-        await db.refresh(updated_user)
+    await db.commit()
+    await db.refresh(updated_user)
 
-        return updated_user
-
-    return None
+    return updated_user
 
 
 async def delete_user(
