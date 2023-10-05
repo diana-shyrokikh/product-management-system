@@ -3,18 +3,20 @@ from typing import Annotated
 from fastapi import (
     APIRouter,
     Depends,
-    HTTPException
+    HTTPException,
+    status
 )
+from fastapi.security import OAuth2PasswordRequestForm
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from dependencies import (
     get_db,
     common_object_parameters,
+    get_current_user,
 )
 
-from users import crud, schemas
-
+from users import crud, schemas, utils
 
 router = APIRouter()
 
@@ -47,13 +49,13 @@ async def retrieve_user(
         return user
 
     raise HTTPException(
-        status_code=404,
+        status_code=status.HTTP_404_NOT_FOUND,
         detail="User not found"
     )
 
 
 @router.post(
-    "/users/",
+    "/signup/",
     response_model=schemas.User,
 )
 async def create_user(
@@ -64,7 +66,7 @@ async def create_user(
             db=db, user_username=user.username
     ):
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Such user already exist"
         )
 
@@ -91,7 +93,7 @@ async def update_user(
         return updated_user
 
     raise HTTPException(
-        status_code=404,
+        status_code=status.HTTP_404_NOT_FOUND,
         detail="You cannot update user data which not found"
     )
 
@@ -114,6 +116,47 @@ async def delete_user(
         return deleted_user
 
     raise HTTPException(
-        status_code=404,
+        status_code=status.HTTP_404_NOT_FOUND,
         detail="You cannot delete the user which not found"
     )
+
+
+@router.post("/login", response_model=schemas.Token)
+async def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: AsyncSession = Depends(get_db),
+) -> [schemas.Token | Exception]:
+    tokens = await crud.login_user(
+        db, form_data.username, form_data.password
+    )
+
+    if not tokens:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect username or password"
+        )
+
+    return tokens
+
+
+@router.post("/refresh_token", response_model=schemas.Token)
+async def refresh_token(
+    token: str,
+) -> [schemas.Token | Exception]:
+    user = await get_current_user(token=token, token_type="refresh")
+    new_access_token = utils.create_token(
+        user,
+        "refresh",
+    )
+
+    return {
+        "access_token": new_access_token,
+        "refresh_token": token
+    }
+
+
+@router.get("/me",  response_model=schemas.User)
+async def get_me(
+        user: schemas.User = Depends(get_current_user)
+) -> [schemas.User | Exception]:
+    return user
