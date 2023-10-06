@@ -4,6 +4,7 @@ from sqlalchemy import (
     String,
     Boolean,
 )
+from sqlalchemy.orm import relationship
 
 from database import Base
 
@@ -31,4 +32,8 @@ class User(Base):
     )
     is_activated = Column(
         Boolean(), default=False
+    )
+
+    orders = relationship(
+        "Order", back_populates="user"
     )

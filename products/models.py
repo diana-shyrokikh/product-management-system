@@ -10,6 +10,8 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 
 import product_categories.models
+from orders.models import order_products
+
 from database import Base
 
 
@@ -31,6 +33,7 @@ class Product(Base):
     created_at = Column(
         DateTime, server_default=func.now()
     )
+    quantity = Column(Integer, default=0)
     category_id = Column(
         Integer, ForeignKey(
             "product_categories.id", ondelete="CASCADE"
@@ -39,4 +42,9 @@ class Product(Base):
 
     category = relationship(
         product_categories.models.ProductCategory
+    )
+    orders = relationship(
+        "Order",
+        secondary=order_products,
+        back_populates="products"
     )
