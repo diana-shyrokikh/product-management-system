@@ -8,6 +8,7 @@ from alembic import context
 from products.models import Product
 from product_categories.models import ProductCategory
 from users.models import User
+from orders.models import Order, order_products
 
 from database import Base
 
