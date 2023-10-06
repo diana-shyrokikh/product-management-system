@@ -15,6 +15,7 @@ class ProductBase(BaseModel):
     name: str
     description: str
     price: float
+    quantity: int
     category_id: int
 
     class Config:
@@ -29,6 +30,7 @@ class CreateProduct(BaseModel):
     name: str
     description: str
     price: float
+    quantity: int
     category_id: int
 
     @field_validator("name")
@@ -55,6 +57,12 @@ class CreateProduct(BaseModel):
             price, "Price"
         )
 
+    @field_validator("quantity")
+    def validate_quantity(cls, quantity):
+        return validate_number(
+            quantity, "Count"
+        )
+
     @field_validator("category_id")
     def validate_category_id(cls, category_id):
         return validate_number(
@@ -66,6 +74,7 @@ class UpdateProduct(CreateProduct):
     name: str = None
     description: str = None
     price: float = None
+    quantity: int = None
     category_id: int = None
 
 
@@ -79,3 +88,15 @@ class Product(ProductBase):
 
 class DeleteProduct(BaseModel):
     message: str
+
+
+class OrderProduct(BaseModel):
+    id: int
+    quantity: int = 1
+
+
+class BuyProduct(BaseModel):
+    id: int
+    name: str
+    price: float
+    quantity: int = 1
