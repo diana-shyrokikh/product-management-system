@@ -65,7 +65,7 @@ def make_products_html(products: list) -> str:
         product_html += f"""
             <li>
                 <b>{product.get("name")}</b><br>
-                Price: {product.get("price")}<br>
+                Price: {product.get("price")}$<br>
                 Quantity: {product.get("quantity")}
             </li>
         """
