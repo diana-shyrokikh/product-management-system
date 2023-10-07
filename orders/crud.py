@@ -2,13 +2,45 @@ from fastapi import status
 
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
-from orders.models import order_products
 from orders.stripe_helper import create_stripe_session
 from products import crud as products_crud
 
 from orders import models, schemas
 from users.email_notification_helper import send_email
+
+
+async def get_all_orders(
+    db: AsyncSession,
+) -> list[dict]:
+    query = select(models.Order).options(
+        selectinload(
+            models.Order.products
+        ).joinedload(models.OrderProduct.product)
+    )
+
+    orders = await db.execute(query)
+
+    orders_list = []
+    for order in orders.scalars().all():
+        products = []
+        for ordered_product in order.products:
+            products.append({
+                "id": ordered_product.product.id,
+                "name": ordered_product.product.name,
+                "price": float(ordered_product.product.price),
+                "quantity": ordered_product.product_quantity
+            })
+
+        orders_list.append({
+            "id": order.id,
+            "total_price": order.total_price,
+            "status": order.status,
+            "products": products
+        })
+
+    return orders_list
 
 
 async def create_order(
@@ -58,10 +90,12 @@ async def create_order(
     order_index = new_order.lastrowid
 
     for product in order.products:
-        order_product = insert(order_products).values(
+        order_product = insert(models.OrderProduct).values(
             order_id=order_index,
             product_id=product.id,
+            product_quantity=product.quantity
         )
+
         await db.execute(order_product)
 
     await db.commit()
@@ -110,9 +144,7 @@ async def delete_order(
 async def update_or_delete_order(
         db: AsyncSession,
         order_id: int,
-        order_status: str,
-        user_id: int = None,
-        username: str = None,
+        order_status: str
 ) -> [models.Order | None]:
     query = select(models.Order).where(
         models.Order.id == order_id
