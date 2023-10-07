@@ -8,18 +8,29 @@ from fastapi import (
 )
 
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from dependencies import (
     get_db,
     get_current_user,
     common_object_parameters,
+    is_admin,
 )
 
 from orders import crud, schemas
 
-from users import schemas as user_schema
+from users import schemas as user_schemas
 
 router = APIRouter()
+
+
+@router.get(
+    "/orders/",
+    response_model=list[schemas.Order],
+)
+async def get_all_orders(
+    db: AsyncSession = Depends(get_db),
+    admin: user_schemas.User = Depends(is_admin)
+) -> list[dict]:
+    return await crud.get_all_orders(db=db)
 
 
 @router.post(
@@ -29,7 +40,7 @@ router = APIRouter()
 async def create_order(
     order: schemas.CreateOrder,
     db: AsyncSession = Depends(get_db),
-    user: user_schema.User = Depends(get_current_user)
+    user: user_schemas.User = Depends(get_current_user)
 ) -> [schemas.PendingOrder | Exception]:
     order = await crud.create_order(
         db=db,
