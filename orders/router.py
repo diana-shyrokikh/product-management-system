@@ -33,6 +33,29 @@ async def get_all_orders(
     return await crud.get_all_orders(db=db)
 
 
+@router.get(
+    "/orders/{object_id}/",
+    response_model=schemas.Order,
+)
+async def get_order(
+    commons: Annotated[
+        dict, Depends(common_object_parameters)
+    ],
+    admin: user_schemas.User = Depends(is_admin)
+) -> [schemas.Order | Exception]:
+    order = await crud.get_order(
+        db=commons.get("db"), order_id=commons.get("object_id")
+    )
+
+    if order:
+        return order
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Order not found"
+    )
+
+
 @router.post(
     "/order/",
     response_model=schemas.PendingOrder,
