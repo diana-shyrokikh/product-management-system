@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import (
     APIRouter,
     Depends,
@@ -10,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from dependencies import (
     get_db,
     get_current_user,
+    common_object_parameters,
 )
 
 from orders import crud, schemas
@@ -29,7 +32,10 @@ async def create_order(
     user: user_schema.User = Depends(get_current_user)
 ) -> [schemas.PendingOrder | Exception]:
     order = await crud.create_order(
-        db=db, order=order, user_id=user.id
+        db=db,
+        order=order,
+        user_id=user.id,
+        username=user.username
     )
 
     if order == status.HTTP_404_NOT_FOUND:
@@ -44,3 +50,35 @@ async def create_order(
         )
 
     return order
+
+
+@router.get(
+    "/success/{object_id}/",
+    response_model=schemas.Message
+)
+async def success(
+    commons: Annotated[
+        dict, Depends(common_object_parameters)
+    ],
+):
+    return await crud.update_or_delete_order(
+        db=commons.get("db"),
+        order_id=commons.get("object_id"),
+        order_status="paid"
+    )
+
+
+@router.get(
+    "/cancel/{object_id}/",
+    response_model=schemas.Message
+)
+async def cancel(
+    commons: Annotated[
+        dict, Depends(common_object_parameters)
+    ],
+):
+    return await crud.update_or_delete_order(
+        db=commons.get("db"),
+        order_id=commons.get("object_id"),
+        order_status="pending"
+    )
