@@ -32,7 +32,7 @@ async def read_categories(
 
 
 @router.get(
-    "/categories/{category_id}/",
+    "/categories/{object_id}/",
     response_model=schemas.Category,
 )
 async def retrieve_category(
@@ -75,7 +75,7 @@ async def create_category(
 
 
 @router.put(
-    "/categories/{category_id}/",
+    "/categories/{object_id}/",
     response_model=schemas.Category,
 )
 async def update_category(
@@ -101,7 +101,7 @@ async def update_category(
 
 
 @router.delete(
-    "/categories/{category_id}/",
+    "/categories/{object_id}/",
     response_model=schemas.DeleteCategory,
 )
 async def delete_category(

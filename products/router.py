@@ -34,7 +34,7 @@ async def read_products(
 
 
 @router.get(
-    "/products/{product_id}/",
+    "/products/{object_id}/",
     response_model=schemas.Product,
 )
 async def retrieve_product(
@@ -85,7 +85,7 @@ async def create_product(
 
 
 @router.put(
-    "/products/{product_id}/",
+    "/products/{object_id}/",
     response_model=schemas.Product,
 )
 async def update_product(
@@ -121,7 +121,7 @@ async def update_product(
 
 
 @router.delete(
-    "/products/{product_id}/",
+    "/products/{object_id}/",
     response_model=schemas.DeleteProduct,
 )
 async def delete_product(

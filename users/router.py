@@ -94,7 +94,7 @@ async def update_user(
 
 
 @router.delete(
-    "/users/{user_id}/",
+    "/users/{object_id}/",
     response_model=schemas.DeleteUser,
 )
 async def delete_user(

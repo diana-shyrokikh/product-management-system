@@ -22,10 +22,10 @@ async def get_db() -> AsyncSession:
 
 
 async def common_object_parameters(
-        pk: int,
+        object_id: int,
         db: AsyncSession = Depends(get_db),
 ) -> dict:
-    return {"db": db, "object_id": pk}
+    return {"db": db, "object_id": object_id}
 
 
 async def get_current_user(
