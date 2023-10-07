@@ -8,13 +8,15 @@ from orders.stripe_helper import create_stripe_session
 from products import crud as products_crud
 
 from orders import models, schemas
+from users.email_notification_helper import send_email
 
 
 async def create_order(
     db: AsyncSession,
     order: schemas.CreateOrder,
     user_id: int,
-    username: str
+    username: str,
+    user_email: str,
 ) -> [dict | None]:
     total_price = 0
     products = []
@@ -77,6 +79,8 @@ async def create_order(
         "total_price": total_price,
         "payment_url": payment_url
     }
+
+    send_email(new_order, user_email)
 
     return new_order
 

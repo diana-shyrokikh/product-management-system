@@ -35,7 +35,8 @@ async def create_order(
         db=db,
         order=order,
         user_id=user.id,
-        username=user.username
+        username=user.username,
+        user_email=user.email
     )
 
     if order == status.HTTP_404_NOT_FOUND:
