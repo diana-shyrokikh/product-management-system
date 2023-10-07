@@ -44,7 +44,5 @@ class Product(Base):
         product_categories.models.ProductCategory
     )
     orders = relationship(
-        "Order",
-        secondary=order_products,
-        back_populates="products"
+        "OrderProduct", back_populates="product"
     )
