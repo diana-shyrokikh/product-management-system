@@ -6,7 +6,6 @@ from sqlalchemy import (
     DateTime,
     func,
     ForeignKey,
-    Table,
 )
 
 from sqlalchemy.orm import relationship
@@ -15,22 +14,13 @@ from sqlalchemy.types import Enum as SQLAlchemyEnum
 from database import Base
 
 
-order_products = Table(
-    "order_products",
-    Base.metadata,
-    Column(
-        "order_id",
-        Integer,
-        ForeignKey("orders.id"),
-        primary_key=True
-    ),
-    Column(
-        "product_id",
-        Integer,
-        ForeignKey("products.id"),
-        primary_key=True
-    ),
-)
+class OrderProduct(Base):
+    __tablename__ = "order_products"
+    order_id = Column(ForeignKey("orders.id"), primary_key=True)
+    product_id = Column(ForeignKey("products.id"), primary_key=True)
+    product_quantity = Column(Integer, default=1)
+    order = relationship("Order", back_populates="products")
+    product = relationship("Product", back_populates="orders")
 
 
 class StatusEnum(str, Enum):
@@ -61,7 +51,5 @@ class Order(Base):
         "User", back_populates="orders"
     )
     products = relationship(
-        "Product",
-        secondary=order_products,
-        back_populates="orders"
+        "OrderProduct", back_populates="order"
     )
