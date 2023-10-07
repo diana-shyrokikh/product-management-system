@@ -10,7 +10,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 
 import product_categories.models
-from orders.models import order_products
 
 from database import Base
 
