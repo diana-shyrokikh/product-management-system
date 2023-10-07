@@ -9,6 +9,7 @@ from products import crud as products_crud
 
 from orders import models, schemas
 from users.email_notification_helper import send_email
+from users.telegram_notification_helper import send_telegram_order_detail
 
 
 async def get_all_orders(
@@ -87,6 +88,7 @@ async def create_order(
     user_id: int,
     username: str,
     user_email: str,
+    user_phone: str,
 ) -> [dict | None]:
     total_price = 0
     products = []
@@ -153,6 +155,9 @@ async def create_order(
     }
 
     send_email(new_order, user_email)
+    await send_telegram_order_detail(
+        new_order, user_phone
+    )
 
     return new_order
 
