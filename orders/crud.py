@@ -43,6 +43,44 @@ async def get_all_orders(
     return orders_list
 
 
+async def get_order(
+    db: AsyncSession,
+    order_id: int,
+) -> [dict | None]:
+    query = (select(models.Order).where(
+        models.Order.id == order_id
+    ).options(
+        selectinload(
+            models.Order.products
+        ).joinedload(models.OrderProduct.product)
+    ))
+
+    order = await db.execute(query)
+    order = order.scalar_one_or_none()
+
+    if order:
+        products = []
+
+        for ordered_product in order.products:
+            products.append({
+                "id": ordered_product.product.id,
+                "name": ordered_product.product.name,
+                "price": float(ordered_product.product.price),
+                "quantity": ordered_product.product_quantity
+            })
+
+        order = {
+            "id": order.id,
+            "total_price": float(order.total_price),
+            "status": order.status.value,
+            "products": products
+        }
+
+        return order
+
+    return None
+
+
 async def create_order(
     db: AsyncSession,
     order: schemas.CreateOrder,
