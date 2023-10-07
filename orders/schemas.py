@@ -19,5 +19,12 @@ class PendingOrder(BaseModel):
     )
 
 
+class Order(BaseModel):
+    id: int
+    total_price: float
+    status: str
+    products: list[products.schemas.BuyProduct]
+
+
 class Message(BaseModel):
     message: str
