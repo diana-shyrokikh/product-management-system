@@ -16,9 +16,23 @@ app.include_router(order_router.router)
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {
+        "greeting":
+            "Hello from ProductManagementAPI! "
+            "Here is the short route list :)",
 
+        "/docs/": "Documentation",
 
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}
+        "/signup/": "Make registration on the API",
+        "/login/": "Login on the API",
+        "/refresh_token/": "Update your access token",
+        "/me/": "Your profile",
+
+        "/products/": "All products",
+        "/products/product_id": "Get the product info by id",
+
+        "/categories": "All categories",
+        "/categories/category_id": "Get the category info by id",
+
+        "/orders/": "Make an order",
+    }
