@@ -12,7 +12,6 @@ SMTP_USERNAME = os.getenv("SMTP_USERNAME")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 
 SENDER_EMAIL = os.getenv("SMTP_USERNAME")
-ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 
 
 def send_email(
